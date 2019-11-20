@@ -1,0 +1,62 @@
+{
+  "_comment": "selenium node",
+  "description": "Selenium Node Image",
+  "variables": {
+    "ami_name": "DCP-selenium-node-Image-{{isotime}}"
+  },
+  "builders": [
+    {
+      "name": "Packer AMI Builder - selenium Node Image",
+      "type": "amazon-ebs",
+      "ami_name": "{{user `ami_name`| clean_ami_name}}",
+      "instance_type": "{{user `instance_type`}}",
+      "region": "{{user `region`}}",
+      "vpc_id": "{{user `vpc_id`}}",
+      "subnet_id": "{{user `subnet_id`}}",
+      "security_group_id": "{{user `security_group_id`}}",
+      "ssh_username": "{{user `ssh_username`}}",
+      "run_tags": {
+        "Image_Name": "Packer-build-{{user `ami_name`| clean_ami_name}}"
+      },
+      "tags": {
+        "Name": "{{user `ami_name`| clean_ami_name}}",
+        "Parent_AMI": "{{user `source_ami`}}",
+        "AMI_Type": "selenium AMI",
+        "ManagedBy": "DCP-Packer"
+      },
+      "ami_description": "Amazon Ubuntu",
+      "source_ami": "{{user `source_ami`}}",
+      "associate_public_ip_address": false,
+      "encrypt_boot": true,
+      "kms_key_id": "{{user `kms_key_id`}}",
+      "ami_block_device_mappings": [
+        {
+          "device_name": "{{user `device_name`}}",
+          "volume_type": "{{user `volume_type`}}",
+          "volume_size": 20,
+          "delete_on_termination": true
+        }
+      ],
+      "communicator": "ssh",
+      "ssh_pty": true
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "inline": [
+        "sudo apt-get update -y",
+	"sudo apt-get upgrade -y",
+        "sudo apt-get install unzip xvfb libxi6 libgconf-2-4 dbus-x11 xserver-xorg-core xfonts-100dpi xfonts-75dpi xfonts-scalable xfonts-cyrillic -y",
+        "sudo add-apt-repository ppa:openjdk-r/ppa -y",
+        "sudo apt-get install openjdk-8-jdk -y",
+        "sudo wget https://github.com/mozilla/geckodriver/releases/download/v0.24.0/geckodriver-v0.24.0-linux64.tar.gz",
+        "sudo tar -xvf geckodriver-v0.24.0-linux64.tar.gz",
+        "sudo chmod +x geckodriver",
+        "sudo mv geckodriver /usr/local/bin/",
+        "sudo apt install firefox -y",
+        "sudo wget -P /home/ubuntu/ http://selenium-release.storage.googleapis.com/3.10/selenium-server-standalone-3.10.0.jar"
+      ]
+    }
+  ]
+}

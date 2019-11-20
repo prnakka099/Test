@@ -1,0 +1,18 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: true    # gather OS info that is made available for tasks/roles
+  become: yes 
+
+  vars:
+    jenkins_hostname: localhost
+    jenkins_home: /mnt/JENKINS_HOME #this needs to be reenabled for EFS
+    jenkins_admin_username: admin
+    jenkins_admin_password: m5ifOlLYVt
+    jenkins_plugins: [ ace-editor, active-directory, amazon-ecr, ant, antisamy-markup-formatter, apache-httpcomponents-client-4-api, aqua-security-scanner, authentication-tokens, aws-credentials, aws-java-sdk, blueocean, blueocean-autofavorite, blueocean-bitbucket-pipeline, blueocean-commons, blueocean-config, blueocean-core-js, blueocean-dashboard, blueocean-display-url, blueocean-events, blueocean-executor-info, blueocean-github-pipeline, blueocean-git-pipeline, blueocean-i18n, blueocean-jira, blueocean-jwt, blueocean-personalization, blueocean-pipeline-api-impl, blueocean-pipeline-editor, blueocean-pipeline-scm-api, blueocean-rest, blueocean-rest-impl, blueocean-web, bouncycastle-api, branch-api, build-keeper-plugin, build-name-setter, build-pipeline-plugin, build-timeout, built-on-column, cloudbees-bitbucket-branch-source, cloudbees-folder, cloudfoundry, command-launcher, conditional-buildstep, config-file-provider, credentials, credentials-binding, cucumber-reports, dashboard-view, display-url-api, docker-build-publish, docker-commons, docker-java-api, docker-plugin, docker-slaves, docker-workflow, durable-task, electricflow, email-ext, emailext-template, embeddable-build-status, envinject, envinject-api, extended-choice-parameter, extensible-choice-parameter, external-monitor-job, favorite, fortify-cloudscan-jenkins-plugin, fortifyJenkins, git, git-client, github, github-api, github-branch-source, gitlab-plugin, git-server, global-build-stats, gradle, greenballs, handlebars, handy-uri-templates-2-api, hp-application-automation-tools-plugin, htmlpublisher, hudson-wsclean-plugin, jackson2-api, javadoc, jdk-tool, jenkins-design-language, jenkins-jira-issue-updater, jenkins-multijob-plugin, jira, jira-steps, jobConfigHistory, job-restrictions, jquery, jquery-detached, jquery-ui, jsch, junit, kubernetes, kubernetes-credentials, ldap, lockable-resources, mailer, mapdb-api, matrix-auth, matrix-project, maven-plugin, mercurial, momentjs, msbuild, nodejs, pam-auth, parameterized-trigger, performance, persistent-parameter, pipeline-aws, pipeline-build-step, pipeline-github-lib, pipeline-graph-analysis, pipeline-input-step, pipeline-milestone-step, pipeline-model-api, pipeline-model-declarative-agent, pipeline-model-definition, pipeline-model-extensions, pipeline-rest-api, pipeline-stage-step, pipeline-stage-tags-metadata, pipeline-stage-view, plain-credentials, pubsub-light, quality-gates, resource-disposer, role-strategy, run-condition, sbt, scm-api, script-security, snsnotify, sonar, sonar-quality-gates, sse-gateway, ssh-credentials, ssh-slaves, structs, subversion, swarm, terraform, timestamper, token-macro, uno-choice, variant, windows-slaves, workflow-aggregator, workflow-api, workflow-basic-steps, workflow-cps, workflow-cps-global-lib, workflow-durable-task-step, workflow-job, workflow-multibranch, workflow-scm-step, workflow-step-api, workflow-support, ws-cleanup, pipeline-graph-analysis]
+    jenkins_java_options: "-Djenkins.install.runSetupWizard=false -Djava.awt.headless=true"
+  roles:
+    - role: ansible-role-java
+      java_packages:
+        - java-1.8.0-openjdk
+    - ansible-role-jenkins

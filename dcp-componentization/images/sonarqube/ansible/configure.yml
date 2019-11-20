@@ -1,0 +1,75 @@
+- name: Install and configure AD authentication
+  hosts: localhost
+  connection: local
+  become: yes
+  become_method: sudo
+  vars:
+
+  tasks:
+    - name: Configure SonarQube JDBC settings for MySQL.
+      lineinfile:
+        dest: /mnt/sonar/sonarqube-7.6/conf/sonar.properties
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        state: present
+      with_items:
+        - regexp: "^sonar.jdbc.username"
+          line: "sonar.jdbc.username={{ sonar_mysql_username }}"
+        - regexp: "^sonar.jdbc.password"
+          line: "sonar.jdbc.password={{ sonar_mysql_password }}"
+        - regexp: "^sonar.jdbc.url"
+          line: "sonar.jdbc.url=jdbc:mysql://{{ sonar_mysql_host }}:{{ sonar_mysql_port }}/{{ sonar_mysql_database }}?useUnicode=true&characterEncoding=utf8&rewriteBatchedStatements=true&useConfigs=maxPerformance&useSSL=false"
+        - regexp: "^sonar.web.context"
+          line: "sonar.web.context={{ sonar_web_context }}"
+    - name: Configure SonarQube LDAP settings.
+      lineinfile:
+        dest: /mnt/sonar/sonarqube-7.6/conf/sonar.properties
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        state: present
+      with_items:
+        - regexp: "^sonar.security.realm"
+          line: "sonar.security.realm=LDAP"
+        - regexp: "^ldap.url"
+          line: "ldap.url={{ dcp_ldap_url }}"
+        - regexp: "^ldap.bindDn"
+          line: "ldap.bindDn={{ dcp_ldap_binddn }}"
+        - regexp: "^ldap.bindPassword"
+          line: "ldap.bindPassword={{ dcp_ldap_bind_password }}"
+        - regexp: "^sonar.authenticator.downcase"
+          line: "sonar.authenticator.downcase=true"
+        - regexp: "^sonar.forceAuthentication"
+          line: "sonar.forceAuthentication=true"
+        - regexp: "^ldap.user.baseDn"
+          line: "ldap.user.baseDn={{ dcp_ldap_user_basedn }}"
+        - regexp: "^ldap.user.request"
+          line: "ldap.user.request={{ dcp_ldap_user_request }}"
+        - regexp: "^ldap.user.realNameAttribute"
+          line: "ldap.user.realNameAttribute=cn"
+        - regexp: "^ldap.user.emailAttribute"
+          line: "ldap.user.emailAttribute=mail"
+        - regexp: "^ldap.group.baseDn"
+          line: "ldap.group.baseDn={{ dcp_ldap_group_basedn }}"
+        - regexp: "^ldap.group.request"
+          line: "ldap.group.request={{ dcp_ldap_group_request }}"
+        - regexp: "^ldap.group.idAttribute"
+          line: "ldap.group.idAttribute=sAMAccountName"
+    - name: Configure SonarQube Java Wrapper Properties.
+      lineinfile:
+        dest: /mnt/sonar/sonarqube-7.6/conf/wrapper.conf
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        state: present
+      with_items:
+        - regexp: "^wrapper.java.additional.2"
+          line: "wrapper.java.additional.2=-Djava.awt.headless=true -Djava.io.tmpdir=/home/ec2-user/temp"
+    - name: Configure SonarQube Startup settings as sonar user.
+      lineinfile:
+        dest: /mnt/sonar/sonarqube-7.6/bin/linux-x86-64/sonar.sh
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        insertafter: "^#! /bin/sh"
+        state: present
+      with_items:
+        - regexp: "^RUN_AS_USER"
+          line: "RUN_AS_USER=sonar"

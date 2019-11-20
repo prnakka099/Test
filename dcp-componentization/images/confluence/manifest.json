@@ -1,0 +1,14 @@
+{
+  "builds": [
+    {
+      "name": "Packer AMI Builder - Confluence Image",
+      "builder_type": "amazon-ebs",
+      "build_time": 1568826670,
+      "files": null,
+      "artifact_id": "us-east-1:ami-09419c4232a0a2dee",
+      "packer_run_uuid": "1508d7fc-3b3d-d670-6327-2f57536a1967",
+      "custom_data": null
+    }
+  ],
+  "last_run_uuid": "1508d7fc-3b3d-d670-6327-2f57536a1967"
+}

@@ -1,0 +1,98 @@
+{
+    "_comment": "Jenkins Master",
+    "description": "Jenkins Master Image",
+    "variables": {
+        "ami_name": "Jenkins-Master-{{isotime}}"
+    },
+    "builders": [{
+        "name": "Packer AMI Builder - Jenkins Master Image",
+        "type": "amazon-ebs",
+        "ami_name": "{{user `ami_name`| clean_ami_name}}",
+        "instance_type": "{{user `instance_type`}}",
+        "region": "{{user `region`}}",
+        "vpc_id": "{{user `vpc_id`}}",
+        "subnet_id": "{{user `subnet_id`}}",
+        "security_group_id": "{{user `security_group_id`}}",
+        "ssh_username": "{{user `ssh_username`}}",
+        "run_tags": {
+            "Image_Name": "Packer-build-{{user `ami_name`| clean_ami_name}}"
+        },
+        "tags": {
+            "Name": "{{user `ami_name`| clean_ami_name}}",
+            "Parent_AMI": "{{user `source_ami`}}",
+            "AMI_Type": "Jenkins Master",
+            "ManagedBy": "Packer"
+        },
+        "ami_description": "Base Amazon Linux 2",
+        "source_ami": "{{user `source_ami`}}",
+        "associate_public_ip_address": false,
+        "encrypt_boot": true,
+        "kms_key_id" : "{{user `kms_key_id`}}",
+        "ami_block_device_mappings": [{
+            "device_name": "{{user `device_name`}}",
+            "volume_type": "{{user `volume_type`}}",
+            "volume_size": 20,
+            "delete_on_termination": true
+        }],
+        "communicator": "ssh",
+        "ssh_pty": true
+    }],
+    "provisioners": [{
+        "type": "shell",
+        "inline": [
+            "sudo mkdir -p /mnt/JENKINS_HOME",
+            "sudo yum update -y",
+            "sudo yum install git -y",
+            "sudo yum install amazon-efs-utils jq ntpdate ntp gcc openssl-devel expat-devel -y",
+            "sudo yum groupinstall 'Development Tools' -y",
+            "sudo amazon-linux-extras install ansible2 -y"
+        ]
+    },
+    {
+        "type": "ansible-local",
+        "playbook_file": "ansible/playbook.yml",
+        "playbook_dir": "ansible",
+        "command": "ansible-playbook",
+        "galaxycommand": "ansible-galaxy"
+    },
+    {
+        "type": "shell",
+        "inline": [
+            "sudo service jenkins stop",
+            "sudo usermod -u 1088 jenkins",
+            "sudo groupmod -g 1088 jenkins",
+            "sudo mkdir -p /var/log/jenkins",
+            "sudo mkdir -p /var/lib/jenkins",
+            "sudo mkdir -p /var/cache/jenkins",
+            "sudo mkdir -p /var/run/jenkins",
+            "sudo chown -R jenkins:jenkins /mnt/JENKINS_HOME",
+            "sudo chown -R jenkins:jenkins /var/log/jenkins",
+            "sudo chown -R jenkins:jenkins /var/lib/jenkins",
+            "sudo chown -R jenkins:jenkins /var/cache/jenkins",
+            "sudo chown -R jenkins:jenkins /var/run/jenkins",
+            "sudo service jenkins start"
+        ]
+    },
+    {
+        "type": "file",
+        "source": "files/",
+        "destination": "/tmp/"
+    },
+    {
+        "type": "shell",
+        "inline": [
+            "ls -alr /tmp/",
+            "wget https://s3.amazonaws.com/amazoncloudwatch-agent/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm",
+            "sudo rpm -U ./amazon-cloudwatch-agent.rpm",
+            "sudo mv -f -b /tmp/file-cloudwatch-agent.json /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.d/file-cloudwatch-agent.json",
+            "sudo chown root:root /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.d/file-cloudwatch-agent.json"
+        ]
+    },
+    {
+        "type": "shell",
+        "inline": [
+            "rm .ssh/authorized_keys ; sudo rm /root/.ssh/authorized_keys"
+        ]
+    }
+    ]
+}

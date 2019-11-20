@@ -1,0 +1,13 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: true    # gather OS info that is made available for tasks/roles
+  become: yes 
+
+  vars:
+   sonar_version: 7.6
+   sonar_download_url: "https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-{{ sonar_version }}.zip"
+   sonar_version_directory: "sonarqube-{{ sonar_version }}"
+      
+  roles:
+     - {role: ansible-role-sonarqube}

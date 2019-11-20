@@ -1,0 +1,46 @@
+{
+    "_comment": "JIRA",
+    "description": "JIRA Image",
+    "variables": {
+        "ami_name": "DCP-JIRA-Image-{{isotime}}"
+    },
+    "builders": [{
+        "name": "Packer AMI Builder - JIRA Image",
+        "type": "amazon-ebs",
+        "ami_name": "{{user `ami_name`| clean_ami_name}}",
+        "instance_type": "{{user `instance_type`}}",
+        "region": "{{user `region`}}",
+        "vpc_id": "{{user `vpc_id`}}",
+        "subnet_id": "{{user `subnet_id`}}",
+        "security_group_id": "{{user `security_group_id`}}",
+        "ssh_username": "{{user `ssh_username`}}",
+        "run_tags": {
+            "Image_Name": "Packer-build-{{user `ami_name`| clean_ami_name}}"
+        },
+        "tags": {
+            "Name": "{{user `ami_name`| clean_ami_name}}",
+            "Parent_AMI": "{{user `source_ami`}}",
+            "AMI_Type": "JIRA AMI",
+            "ManagedBy": "DCP-Packer"
+        },
+        "ami_description": "Amazon Linux",
+        "source_ami": "{{user `source_ami`}}",
+        "associate_public_ip_address": false,
+        "encrypt_boot": true,
+        "kms_key_id" : "{{user `kms_key_id`}}",
+        "ami_block_device_mappings": [{
+            "device_name": "{{user `device_name`}}",
+            "volume_type": "{{user `volume_type`}}",
+            "volume_size": 20,
+            "delete_on_termination": true
+        }],
+        "communicator": "ssh",
+        "ssh_pty": true
+    }],
+    "provisioners": [
+    {
+        "type": "shell",
+        "script": "jira-install.sh"
+    }
+    ]
+}
